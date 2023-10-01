@@ -1,29 +1,23 @@
 // Initialize game variables
 const rows = 16;
 const cols = 9;
-let board = [];
-let path = []; // For storing the path cells
-let enemies = []; // For storing enemy elements
-let pawns = []; // For storing pawn elements
+let board = Array.from(Array(rows), () => new Array(cols).fill(0));
+let path = [];
+let score = 0;
+let lives = 10;
 
-// Initialize the board and draw cells
-const gameBoard = document.getElementById('gameBoard');
-const scoreElement = document.getElementById('score');
-const livesElement = document.getElementById('lives');
-
-for (let i = 0; i < rows; i++) {
-  board[i] = [];
-  for (let j = 0; j < cols; j++) {
-    const cell = document.createElement('div');
-    cell.classList.add('cell');
-    cell.style.top = `${i * 40}px`;
-    cell.style.left = `${j * 40}px`;
-    board[i][j] = cell;
-    gameBoard.appendChild(cell);
+// Function to set up the game board
+function setupBoard() {
+  const gameBoard = document.getElementById("gameBoard");
+  for (let i = 0; i < rows; i++) {
+    for (let j = 0; j < cols; j++) {
+      const cell = document.createElement("div");
+      cell.classList.add("cell");
+      cell.id = `cell-${i}-${j}`;
+      gameBoard.appendChild(cell);
+    }
   }
 }
 
-// Generate a random path for the enemies, different per difficulty level
-function generatePath(level) {
-  // Path generation logic...
-}
+// Initialize the board setup
+setupBoard();
