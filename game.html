@@ -3,58 +3,107 @@
 <head>
   <title>Tower Defense Chess</title>
   <style>
-    /* Add your CSS styles here */
+    #gameBoard {
+      width: 360px;
+      height: 640px;
+      position: relative;
+    }
+    .cell {
+      width: 40px;
+      height: 40px;
+      border: 1px solid black;
+      position: absolute;
+    }
+    .enemy, .pawn {
+      width: 40px;
+      height: 40px;
+      position: absolute;
+      text-align: center;
+      line-height: 40px;
+      font-weight: bold;
+    }
+    .enemy {
+      background-color: red;
+    }
+    .pawn {
+      background-color: green;
+    }
   </style>
 </head>
 <body>
 
-  <div id="gameBoard">
-    <!-- Game board will be drawn here -->
-  </div>
+  <div id="gameBoard"></div>
 
-  <div id="menu">
-    <!-- Piece menu will be added here -->
-  </div>
+  <button onclick="addPawn()">Add Pawn</button>
 
   <script>
-    let rows = 16;
-    let cols = 9;
-    let grid = Array(rows).fill(null).map(() => Array(cols).fill(null));
-    let enemies = [];
-    let playerScore = 0;
+    // Initialize basic variables
+    const rows = 16; // Board height
+    const cols = 9; // Board width
+    const cellSize = 40; // Cell dimensions, in pixels
+    let grid = Array(rows).fill(null).map(() => Array(cols).fill(null)); // Game grid
+    let enemies = []; // Array to hold enemies
+    let playerScore = 0; // Player's score
+    let defenderPawns = 4; // Starting number of defender pawns
 
-    // Initialize 4 defender pawns
-    let defenderPawns = 4;
-
-    // Function to draw the board and pieces
+    // Draw the game board
     function drawBoardAndPieces() {
-      // Your code to draw the board and pieces
+      const gameBoard = document.getElementById("gameBoard");
+      gameBoard.innerHTML = '';
+
+      // Draw grid
+      for (let y = 0; y < rows; y++) {
+        for (let x = 0; x < cols; x++) {
+          const cell = document.createElement('div');
+          cell.className = 'cell';
+          cell.style.left = `${x * cellSize}px`;
+          cell.style.top = `${y * cellSize}px`;
+          gameBoard.appendChild(cell);
+
+          // Allow piece placement on click
+          cell.addEventListener('click', () => placePiece(x, y));
+        }
+      }
+
+      // Draw enemies
+      for (const enemy of enemies) {
+        const enemyEl = document.createElement('div');
+        enemyEl.className = 'enemy';
+        enemyEl.style.left = `${enemy.x * cellSize}px`;
+        enemyEl.style.top = `${enemy.y * cellSize}px`;
+        gameBoard.appendChild(enemyEl);
+      }
     }
 
-    // Function to handle tap on a chess piece in the menu
-    function selectPiece(piece) {
-      selectedPiece = piece;
-    }
-
-    // Function to handle tap on a board cell
-    function placePiece(x, y) {
-      if (selectedPiece) {
-        grid[y][x] = selectedPiece;
-        selectedPiece = null;
+    // Add a pawn to the board
+    function addPawn() {
+      if (defenderPawns > 0) {
+        const x = Math.floor(Math.random() * cols);
+        const y = Math.floor(Math.random() * rows);
+        grid[y][x] = { type: 'pawn', value: 1 };
+        defenderPawns--;
         drawBoardAndPieces();
       }
     }
 
-    // Function to spawn a new enemy
+    // Handle piece placement
+    function placePiece(x, y) {
+      if (!grid[y][x]) {
+        grid[y][x] = { type: 'pawn', value: 1 }; // Value represents relative strength
+        defenderPawns--;
+        drawBoardAndPieces();
+      }
+    }
+
+    // Spawn an enemy at random intervals
     function spawnEnemy() {
       const spawnInterval = Math.random() * 2000 + 1000; // 1 to 3 seconds
-      const enemy = { type: 'pawn', x: Math.floor(Math.random() * cols), y: 0 };
-
+      const enemy = { type: 'pawn', x: Math.floor(Math.random() * cols), y: 0, value: 1 };
       enemies.push(enemy);
       setTimeout(spawnEnemy, spawnInterval);
     }
 
-    // Function to resolve combat
+    // Resolve combat between defender and enemy
     function resolveCombat(defender, enemy) {
       if (defender.value > enemy.value) {
         return 'defender';
@@ -65,41 +114,42 @@
       }
     }
 
-    // Function to move enemies
+    // Move enemies down the grid
     function moveEnemies() {
-      for (let enemy of enemies) {
+      const newEnemies = [];
+
+      for (const enemy of enemies) {
         if (enemy.y < rows - 1) {
           const defender = grid[enemy.y + 1][enemy.x];
           if (defender) {
             const outcome = resolveCombat(defender, enemy);
             if (outcome === 'defender') {
               playerScore += defender.value;
-              enemies = enemies.filter(e => e !== enemy);
             } else if (outcome === 'enemy') {
               grid[enemy.y + 1][enemy.x] = null;
               enemy.y++;
-            } else {
-              enemies = enemies.filter(e => e !== enemy);
-              grid[enemy.y + 1][enemy.x] = null;
+              newEnemies.push(enemy);
             }
           } else {
             enemy.y++;
+            newEnemies.push(enemy);
           }
-        } else {
-          // Enemy reached the end; handle accordingly
         }
-
-        drawBoardAndPieces();
       }
+
+      enemies = newEnemies;
+      drawBoardAndPieces();
     }
 
     // Start the game
     function startGame() {
       spawnEnemy();
       setInterval(moveEnemies, 1000);
+      drawBoardAndPieces();
     }
 
     startGame();
   </script>
+
 </body>
 </html>
