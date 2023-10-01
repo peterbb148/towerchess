@@ -1,35 +1,47 @@
-// Array to hold the enemy objects
-let enemies = [];
+// Create enemy
+function createEnemy(x, y) {
+  const enemy = document.createElement('div');
+  enemy.classList.add('enemy');
+  enemy.style.left = `${x * 40}px`;
+  enemy.style.top = `${y * 40}px`;
+  board.appendChild(enemy);
+  return enemy;
+}
 
-// Function to create enemy object
-function createEnemy() {
-  let enemy = {
-    type: "pawn",
-    strength: 1,
-    position: [0, 0] // Initialize at the top-left corner
-  };
+// Move enemies
+function moveEnemies() {
+  enemies.forEach(enemy => {
+    if (enemy.index < path.length - 1) {
+      enemy.index++;
+      const point = path[enemy.index];
+      enemy.el.style.left = `${point.x * 40}px`;
+      enemy.el.style.top = `${point.y * 40}px`;
+    } else {
+      board.removeChild(enemy.el);
+    }
+  });
+  enemies = enemies.filter(enemy => enemy.index < path.length - 1);
+}
+
+// Spawn enemy
+function spawnEnemy() {
+  const enemy = { el: createEnemy(path[0].x, path[0].y), index: 0 };
   enemies.push(enemy);
 }
 
-// Function to move enemies along the path
-function moveEnemies() {
-  for (let enemy of enemies) {
-    // Your logic for moving enemies based on the path
-  }
+// Place pawn
+function placePawn(x, y) {
+  if (pawns <= 0) return;
+  const pawn = document.createElement('div');
+  pawn.classList.add('pawn');
+  pawn.style.left = `${x * 40}px`;
+  pawn.style.top = `${y * 40}px`;
+  board.appendChild(pawn);
+  pawns--;
 }
 
-// Function to handle collisions between enemies and defenders
-function handleCollisions() {
-  // Your collision handling logic here
-}
-
-// Main game loop
-function gameLoop() {
-  createEnemy();
+spawnEnemy();
+setInterval(() => {
+  spawnEnemy();
   moveEnemies();
-  handleCollisions();
-  requestAnimationFrame(gameLoop);
-}
-
-// Start the game loop
-gameLoop();
+}, 1000);
