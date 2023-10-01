@@ -28,6 +28,12 @@
     .pawn {
       background-color: green;
     }
+    .start, .end {
+      width: 40px;
+      height: 40px;
+      position: absolute;
+      background-color: blue;
+    }
   </style>
 </head>
 <body>
@@ -41,6 +47,7 @@
     let enemies = [];
     let pawns = 4;
 
+    // Create board
     for (let y = 0; y < rows; y++) {
       for (let x = 0; x < cols; x++) {
         const cell = document.createElement('div');
@@ -52,15 +59,31 @@
       }
     }
 
+    // Create path
     for (let i = 0; i < rows; i++) {
       path.push({ x: 4, y: i });
     }
 
+    // Highlight path
     path.forEach(point => {
       const idx = point.y * cols + point.x;
       board.children[idx].classList.add('path');
     });
 
+    // Indicate start and end points
+    const start = document.createElement('div');
+    start.classList.add('start');
+    start.style.left = `${path[0].x * 40}px`;
+    start.style.top = `${path[0].y * 40}px`;
+    board.appendChild(start);
+
+    const end = document.createElement('div');
+    end.classList.add('end');
+    end.style.left = `${path[path.length - 1].x * 40}px`;
+    end.style.top = `${path[path.length - 1].y * 40}px`;
+    board.appendChild(end);
+
+    // Create enemy
     function createEnemy(x, y) {
       const enemy = document.createElement('div');
       enemy.classList.add('enemy');
@@ -70,6 +93,7 @@
       return enemy;
     }
 
+    // Move enemies
     function moveEnemies() {
       enemies.forEach(enemy => {
         if (enemy.index < path.length - 1) {
@@ -84,11 +108,13 @@
       enemies = enemies.filter(enemy => enemy.index < path.length - 1);
     }
 
+    // Spawn enemy
     function spawnEnemy() {
       const enemy = { el: createEnemy(path[0].x, path[0].y), index: 0 };
       enemies.push(enemy);
     }
 
+    // Place pawn
     function placePawn(x, y) {
       if (pawns <= 0) return;
       const pawn = document.createElement('div');
