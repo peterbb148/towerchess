@@ -1,28 +1,26 @@
-let score = 0;
-let lives = 10; // Start with 10 lives
-
-// Update the scoreboard
-function updateScoreboard() {
-  scoreElement.innerHTML = score;
-  livesElement.innerHTML = lives;
+// Initialize game
+function initGame() {
+  // You can set initial game settings or preload assets here
+  // For now, it's empty
 }
 
-// Add pawns to the board
-function addPawn(row, col) {
-  // ...
+// Event listeners for user actions
+function setupEventListeners() {
+  // Example: listen for clicks to place defender pieces
+  document.addEventListener("click", function(event) {
+    // Your click handling logic here
+  });
 }
 
-// Event listener for adding pawns
-gameBoard.addEventListener('click', function(event) {
-  // ...
-});
+// Start the game
+initGame();
+setupEventListeners();
 
-// Initial call to set up the game
-(function init() {
-  generatePath(1);
-  spawnEnemy();
-  updateScoreboard();
-})();
+// Link to setup and game loop
+const script1 = document.createElement('script');
+script1.src = 'https://peterbb148.github.io/towerchess/setup.js';
+document.body.appendChild(script1);
 
-// Kick off the game loop
-gameLoop();
+const script2 = document.createElement('script');
+script2.src = 'https://peterbb148.github.io/towerchess/gameLoop.js';
+document.body.appendChild(script2);
