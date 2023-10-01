@@ -3,10 +3,19 @@
 <head>
   <title>Tower Defense Game</title>
   <style>
+    #scoreboard {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      background-color: #ccc;
+      text-align: center;
+    }
     #gameBoard {
       position: relative;
       width: 360px;
       height: 640px;
+      margin-top: 30px;
     }
     .cell {
       width: 40px;
@@ -28,15 +37,10 @@
     .pawn {
       background-color: green;
     }
-    .start, .end {
-      width: 40px;
-      height: 40px;
-      position: absolute;
-      background-color: blue;
-    }
   </style>
 </head>
 <body>
+  <div id="scoreboard">Score: <span id="score">0</span></div>
   <div id="gameBoard"></div>
 
   <script>
@@ -45,45 +49,29 @@
     const board = document.getElementById('gameBoard');
     let path = [];
     let enemies = [];
-    let pawns = 4;
+    let pawns = [];
+    let score = 0;
+    const scoreboardEl = document.getElementById('score');
 
-    // Create board
     for (let y = 0; y < rows; y++) {
       for (let x = 0; x < cols; x++) {
         const cell = document.createElement('div');
         cell.classList.add('cell');
         cell.style.left = `${x * 40}px`;
         cell.style.top = `${y * 40}px`;
-        cell.addEventListener('click', () => placePawn(x, y));
         board.appendChild(cell);
       }
     }
 
-    // Create path
     for (let i = 0; i < rows; i++) {
       path.push({ x: 4, y: i });
     }
 
-    // Highlight path
     path.forEach(point => {
       const idx = point.y * cols + point.x;
       board.children[idx].classList.add('path');
     });
 
-    // Indicate start and end points
-    const start = document.createElement('div');
-    start.classList.add('start');
-    start.style.left = `${path[0].x * 40}px`;
-    start.style.top = `${path[0].y * 40}px`;
-    board.appendChild(start);
-
-    const end = document.createElement('div');
-    end.classList.add('end');
-    end.style.left = `${path[path.length - 1].x * 40}px`;
-    end.style.top = `${path[path.length - 1].y * 40}px`;
-    board.appendChild(end);
-
-    // Create enemy
     function createEnemy(x, y) {
       const enemy = document.createElement('div');
       enemy.classList.add('enemy');
@@ -93,7 +81,6 @@
       return enemy;
     }
 
-    // Move enemies
     function moveEnemies() {
       enemies.forEach(enemy => {
         if (enemy.index < path.length - 1) {
@@ -101,6 +88,16 @@
           const point = path[enemy.index];
           enemy.el.style.left = `${point.x * 40}px`;
           enemy.el.style.top = `${point.y * 40}px`;
+          
+          // Collision detection logic
+          pawns.forEach((pawn, i) => {
+            if (pawn.x === point.x && pawn.y === point.y) {
+              score += 1;
+              scoreboardEl.textContent = score;
+              board.removeChild(pawn.el);
+              pawns.splice(i, 1);
+            }
+          });
         } else {
           board.removeChild(enemy.el);
         }
@@ -108,21 +105,18 @@
       enemies = enemies.filter(enemy => enemy.index < path.length - 1);
     }
 
-    // Spawn enemy
     function spawnEnemy() {
       const enemy = { el: createEnemy(path[0].x, path[0].y), index: 0 };
       enemies.push(enemy);
     }
 
-    // Place pawn
     function placePawn(x, y) {
-      if (pawns <= 0) return;
       const pawn = document.createElement('div');
       pawn.classList.add('pawn');
       pawn.style.left = `${x * 40}px`;
       pawn.style.top = `${y * 40}px`;
       board.appendChild(pawn);
-      pawns--;
+      pawns.push({ x, y, el: pawn });
     }
 
     spawnEnemy();
