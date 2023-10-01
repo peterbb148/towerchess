@@ -1,12 +1,12 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Tower Defense Chess</title>
+  <title>Tower Defense Game</title>
   <style>
     #gameBoard {
+      position: relative;
       width: 360px;
       height: 640px;
-      position: relative;
     }
     .cell {
       width: 40px;
@@ -14,30 +14,31 @@
       border: 1px solid black;
       position: absolute;
     }
-    .path, .entry, .exit {
-      background-color: lightblue;
+    .path {
+      background-color: lightgray;
     }
     .enemy {
-      background-color: red;
       width: 40px;
       height: 40px;
+      background-color: red;
       position: absolute;
     }
   </style>
 </head>
 <body>
-
   <div id="gameBoard"></div>
 
   <script>
+    // Initialize variables
     const rows = 16;
     const cols = 9;
     const board = document.getElementById('gameBoard');
+    let path = [];
     let enemies = [];
 
-    // Create the game board
-    for(let y = 0; y < rows; y++) {
-      for(let x = 0; x < cols; x++) {
+    // Draw the board
+    for (let y = 0; y < rows; y++) {
+      for (let x = 0; x < cols; x++) {
         const cell = document.createElement('div');
         cell.classList.add('cell');
         cell.style.left = `${x * 40}px`;
@@ -46,19 +47,18 @@
       }
     }
 
-    // Generate a simple path for demo purposes
-    let path = [];
-    for(let i = 0; i < rows; i++) {
-      path.push({x: 4, y: i});
+    // Simple path logic
+    for (let i = 0; i < rows; i++) {
+      path.push({ x: 4, y: i });
     }
 
-    // Draw the path on board
+    // Highlight the path
     path.forEach(point => {
-      const index = point.y * cols + point.x;
-      board.children[index].classList.add('path');
+      const idx = point.y * cols + point.x;
+      board.children[idx].classList.add('path');
     });
 
-    // Create enemy div
+    // Create an enemy
     function createEnemy(x, y) {
       const enemy = document.createElement('div');
       enemy.classList.add('enemy');
@@ -68,13 +68,7 @@
       return enemy;
     }
 
-    // Spawn enemy at the start of the path
-    function spawnEnemy() {
-      const enemy = { el: createEnemy(path[0].x, path[0].y), index: 0 };
-      enemies.push(enemy);
-    }
-
-    // Move enemies along the path
+    // Move enemies
     function moveEnemies() {
       enemies.forEach(enemy => {
         if (enemy.index < path.length - 1) {
@@ -89,10 +83,14 @@
       enemies = enemies.filter(enemy => enemy.index < path.length - 1);
     }
 
-    // Initial spawn
-    spawnEnemy();
+    // Spawn an enemy at the start of the path
+    function spawnEnemy() {
+      const enemy = { el: createEnemy(path[0].x, path[0].y), index: 0 };
+      enemies.push(enemy);
+    }
 
-    // Move every second
+    // Initial spawn and move logic
+    spawnEnemy();
     setInterval(() => {
       spawnEnemy();
       moveEnemies();
