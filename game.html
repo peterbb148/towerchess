@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Tower Defense Chess</title>
+  <style>
+    /* Add your CSS styles here */
+  </style>
+</head>
+<body>
+
+  <div id="gameBoard">
+    <!-- Game board will be drawn here -->
+  </div>
+
+  <div id="menu">
+    <!-- Piece menu will be added here -->
+  </div>
+
+  <script>
+    let rows = 16;
+    let cols = 9;
+    let grid = Array(rows).fill(null).map(() => Array(cols).fill(null));
+    let enemies = [];
+    let playerScore = 0;
+
+    // Initialize 4 defender pawns
+    let defenderPawns = 4;
+
+    // Function to draw the board and pieces
+    function drawBoardAndPieces() {
+      // Your code to draw the board and pieces
+    }
+
+    // Function to handle tap on a chess piece in the menu
+    function selectPiece(piece) {
+      selectedPiece = piece;
+    }
+
+    // Function to handle tap on a board cell
+    function placePiece(x, y) {
+      if (selectedPiece) {
+        grid[y][x] = selectedPiece;
+        selectedPiece = null;
+        drawBoardAndPieces();
+      }
+    }
+
+    // Function to spawn a new enemy
+    function spawnEnemy() {
+      const spawnInterval = Math.random() * 2000 + 1000; // 1 to 3 seconds
+      const enemy = { type: 'pawn', x: Math.floor(Math.random() * cols), y: 0 };
+
+      enemies.push(enemy);
+      setTimeout(spawnEnemy, spawnInterval);
+    }
+
+    // Function to resolve combat
+    function resolveCombat(defender, enemy) {
+      if (defender.value > enemy.value) {
+        return 'defender';
+      } else if (defender.value < enemy.value) {
+        return 'enemy';
+      } else {
+        return 'draw';
+      }
+    }
+
+    // Function to move enemies
+    function moveEnemies() {
+      for (let enemy of enemies) {
+        if (enemy.y < rows - 1) {
+          const defender = grid[enemy.y + 1][enemy.x];
+          if (defender) {
+            const outcome = resolveCombat(defender, enemy);
+            if (outcome === 'defender') {
+              playerScore += defender.value;
+              enemies = enemies.filter(e => e !== enemy);
+            } else if (outcome === 'enemy') {
+              grid[enemy.y + 1][enemy.x] = null;
+              enemy.y++;
+            } else {
+              enemies = enemies.filter(e => e !== enemy);
+              grid[enemy.y + 1][enemy.x] = null;
+            }
+          } else {
+            enemy.y++;
+          }
+        } else {
+          // Enemy reached the end; handle accordingly
+        }
+
+        drawBoardAndPieces();
+      }
+    }
+
+    // Start the game
+    function startGame() {
+      spawnEnemy();
+      setInterval(moveEnemies, 1000);
+    }
+
+    startGame();
+  </script>
+</body>
+</html>
