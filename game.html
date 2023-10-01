@@ -17,11 +17,16 @@
     .path {
       background-color: lightgray;
     }
-    .enemy {
+    .enemy, .pawn {
       width: 40px;
       height: 40px;
-      background-color: red;
       position: absolute;
+    }
+    .enemy {
+      background-color: red;
+    }
+    .pawn {
+      background-color: green;
     }
   </style>
 </head>
@@ -29,36 +34,33 @@
   <div id="gameBoard"></div>
 
   <script>
-    // Initialize variables
     const rows = 16;
     const cols = 9;
     const board = document.getElementById('gameBoard');
     let path = [];
     let enemies = [];
+    let pawns = 4;
 
-    // Draw the board
     for (let y = 0; y < rows; y++) {
       for (let x = 0; x < cols; x++) {
         const cell = document.createElement('div');
         cell.classList.add('cell');
         cell.style.left = `${x * 40}px`;
         cell.style.top = `${y * 40}px`;
+        cell.addEventListener('click', () => placePawn(x, y));
         board.appendChild(cell);
       }
     }
 
-    // Simple path logic
     for (let i = 0; i < rows; i++) {
       path.push({ x: 4, y: i });
     }
 
-    // Highlight the path
     path.forEach(point => {
       const idx = point.y * cols + point.x;
       board.children[idx].classList.add('path');
     });
 
-    // Create an enemy
     function createEnemy(x, y) {
       const enemy = document.createElement('div');
       enemy.classList.add('enemy');
@@ -68,7 +70,6 @@
       return enemy;
     }
 
-    // Move enemies
     function moveEnemies() {
       enemies.forEach(enemy => {
         if (enemy.index < path.length - 1) {
@@ -83,13 +84,21 @@
       enemies = enemies.filter(enemy => enemy.index < path.length - 1);
     }
 
-    // Spawn an enemy at the start of the path
     function spawnEnemy() {
       const enemy = { el: createEnemy(path[0].x, path[0].y), index: 0 };
       enemies.push(enemy);
     }
 
-    // Initial spawn and move logic
+    function placePawn(x, y) {
+      if (pawns <= 0) return;
+      const pawn = document.createElement('div');
+      pawn.classList.add('pawn');
+      pawn.style.left = `${x * 40}px`;
+      pawn.style.top = `${y * 40}px`;
+      board.appendChild(pawn);
+      pawns--;
+    }
+
     spawnEnemy();
     setInterval(() => {
       spawnEnemy();
