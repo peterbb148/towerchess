@@ -14,6 +14,15 @@
       border: 1px solid black;
       position: absolute;
     }
+    .entry, .exit, .path {
+      background-color: lightblue; /* Path color */
+    }
+    .entry {
+      background-color: yellow; /* Entry square color */
+    }
+    .exit {
+      background-color: purple; /* Exit square color */
+    }
     .enemy, .pawn {
       width: 40px;
       height: 40px;
@@ -37,115 +46,86 @@
   <button onclick="addPawn()">Add Pawn</button>
 
   <script>
-    // Initialize basic variables
-    const rows = 16; // Board height
-    const cols = 9; // Board width
-    const cellSize = 40; // Cell dimensions, in pixels
-    let grid = Array(rows).fill(null).map(() => Array(cols).fill(null)); // Game grid
-    let enemies = []; // Array to hold enemies
-    let playerScore = 0; // Player's score
-    let defenderPawns = 4; // Starting number of defender pawns
+    // ... (Keep the previous initializations and functions)
+
+    // Generate a random path for enemies
+    function generatePath() {
+      let x = Math.floor(Math.random() * cols);
+      let y = 0;
+      let path = [];
+      
+      while (y < rows - 1) {
+        const direction = Math.random() < 0.5 ? 'right' : 'down';
+        
+        if (direction === 'right' && x < cols - 1) {
+          x++;
+        } else {
+          y++;
+        }
+
+        path.push({ x, y });
+      }
+      
+      return path;
+    }
+
+    // Draw path on board
+    function drawPath(path) {
+      for (const point of path) {
+        const cell = document.querySelector(`.cell[data-x='${point.x}'][data-y='${point.y}']`);
+        cell.classList.add('path');
+      }
+    }
+
+    // Initialize the board
+    function init() {
+      const path = generatePath();
+      drawPath(path);
+
+      spawnEnemy(path);
+      setInterval(() => moveEnemies(path), 1000);
+      drawBoardAndPieces();
+    }
 
     // Draw the game board
     function drawBoardAndPieces() {
-      const gameBoard = document.getElementById("gameBoard");
-      gameBoard.innerHTML = '';
+      // ... (Keep the previous code)
 
-      // Draw grid
-      for (let y = 0; y < rows; y++) {
-        for (let x = 0; x < cols; x++) {
-          const cell = document.createElement('div');
-          cell.className = 'cell';
-          cell.style.left = `${x * cellSize}px`;
-          cell.style.top = `${y * cellSize}px`;
-          gameBoard.appendChild(cell);
-
-          // Allow piece placement on click
-          cell.addEventListener('click', () => placePiece(x, y));
-        }
-      }
-
-      // Draw enemies
-      for (const enemy of enemies) {
-        const enemyEl = document.createElement('div');
-        enemyEl.className = 'enemy';
-        enemyEl.style.left = `${enemy.x * cellSize}px`;
-        enemyEl.style.top = `${enemy.y * cellSize}px`;
-        gameBoard.appendChild(enemyEl);
-      }
-    }
-
-    // Add a pawn to the board
-    function addPawn() {
-      if (defenderPawns > 0) {
-        const x = Math.floor(Math.random() * cols);
-        const y = Math.floor(Math.random() * rows);
-        grid[y][x] = { type: 'pawn', value: 1 };
-        defenderPawns--;
-        drawBoardAndPieces();
-      }
-    }
-
-    // Handle piece placement
-    function placePiece(x, y) {
-      if (!grid[y][x]) {
-        grid[y][x] = { type: 'pawn', value: 1 }; // Value represents relative strength
-        defenderPawns--;
-        drawBoardAndPieces();
-      }
+      // Add entry and exit points
+      document.querySelector(`.cell[data-x='${enemies[0]?.x}'][data-y='0']`).classList.add('entry');
+      document.querySelector(`.cell[data-x='${enemies[enemies.length - 1]?.x}'][data-y='${rows - 1}']`).classList.add('exit');
     }
 
     // Spawn an enemy at random intervals
-    function spawnEnemy() {
-      const spawnInterval = Math.random() * 2000 + 1000; // 1 to 3 seconds
-      const enemy = { type: 'pawn', x: Math.floor(Math.random() * cols), y: 0, value: 1 };
+    function spawnEnemy(path) {
+      const spawnInterval = Math.random() * 2000 + 1000;
+      const entry = path[0];
+      const enemy = { type: 'pawn', x: entry.x, y: entry.y, value: 1 };
       enemies.push(enemy);
-      setTimeout(spawnEnemy, spawnInterval);
-    }
 
-    // Resolve combat between defender and enemy
-    function resolveCombat(defender, enemy) {
-      if (defender.value > enemy.value) {
-        return 'defender';
-      } else if (defender.value < enemy.value) {
-        return 'enemy';
-      } else {
-        return 'draw';
-      }
+      setTimeout(() => spawnEnemy(path), spawnInterval);
     }
 
     // Move enemies down the grid
-    function moveEnemies() {
-      const newEnemies = [];
-
+    function moveEnemies(path) {
+      // ... (Keep the previous code)
+      
+      // Make enemies follow the path
       for (const enemy of enemies) {
-        if (enemy.y < rows - 1) {
-          const defender = grid[enemy.y + 1][enemy.x];
-          if (defender) {
-            const outcome = resolveCombat(defender, enemy);
-            if (outcome === 'defender') {
-              playerScore += defender.value;
-            } else if (outcome === 'enemy') {
-              grid[enemy.y + 1][enemy.x] = null;
-              enemy.y++;
-              newEnemies.push(enemy);
-            }
-          } else {
-            enemy.y++;
-            newEnemies.push(enemy);
-          }
+        const nextStep = path.find(point => point.y === enemy.y + 1);
+        if (nextStep) {
+          enemy.x = nextStep.x;
+          enemy.y = nextStep.y;
         }
       }
-
-      enemies = newEnemies;
-      drawBoardAndPieces();
     }
 
     // Start the game
     function startGame() {
-      spawnEnemy();
-      setInterval(moveEnemies, 1000);
-      drawBoardAndPieces();
+      // ... (Keep the previous code)
+
+      // Initialize the board with a path
+      init();
     }
 
     startGame();
